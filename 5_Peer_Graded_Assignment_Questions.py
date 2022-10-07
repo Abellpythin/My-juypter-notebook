@@ -74,7 +74,7 @@ def compute_data_choice_2(df):
 app.layout = html.Div(children=[ 
                                 # TASK1: Add title to the dashboard
                                 # Enter your code below. Make sure you have correct formatting.
-     html.H1('US Domestic Airline Data visualization', style={'textAlign':'center', 'color':'#FF0000', 'font-size': 22})
+     html.H1('US Domestic Airline Data visualization', style = {'textAlign':'center', 'color':'#FF0000', 'font-size': 22})
     
     
                                 # REVIEW2: Dropdown creation
@@ -95,7 +95,7 @@ app.layout = html.Div(children=[
                                                             {'label': 'Yearly Airline Performance Report', 'value': 'OPT1'},
                                                             {'label': 'Yearly Airline Delay Report', 'value': 'OPT2'}],
                                                     placeholder='Select a report type',
-                                                    style={'width':'80%', 'padding':'4px', 'font-size': '22px', 'text-align-last' : 'center'}),
+                                                    style={'width':'40%', 'padding':'4px', 'font-size': '22px', 'text-align-last': 'center'}),
                                
                                         
                                     # Place them next to each other using the division style
@@ -166,6 +166,8 @@ def get_graph(chart, year, children1, children2, c3, c4, c5):
             
             # TASK5: Average flight time by reporting airline
             # Enter your code below. Make sure you have correct formatting.
+            line_fig = px.line(line_data, x = 'Month' , y = 'AirTime', color = 'Repoting_Airline', title = 'Averge monthly flight time in minutes by airline') 
+            
             
             
             # Percentage of diverted airport landings per reporting airline
@@ -189,8 +191,8 @@ def get_graph(chart, year, children1, children2, c3, c4, c5):
                        path = ['DestState', 'Reporting_Airline'],
                        values = 'Flights',
                        color = 'Flights',
-                       color_continuous_scale = 'rdbu',
-                       title = 'Flight count from airline to destination'
+                       color_continuous_scale = 'RdBu',
+                       title = 'Flight count from airline to destination')
             
             
             # REVIEW6: Return dcc.Graph component to the empty division
