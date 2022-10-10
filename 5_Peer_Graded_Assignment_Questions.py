@@ -1,10 +1,9 @@
-# Import required libraries
+# Libraries
 import pandas as pd
 import dash
 import dash_html_components as html
 import dash_core_components as dcc
 from dash.dependencies import Input, Output, State
-import plotly.graph_objects as go
 import plotly.express as px
 from dash import no_update
 
@@ -12,10 +11,10 @@ from dash import no_update
 # Create a dash application
 app = dash.Dash(__name__)
 
-# REVIEW1: Clear the layout and do not display exception till callback gets executed
+# Clear the layout and do not display exception till callback gets executed
 app.config.suppress_callback_exceptions = True
 
-# Read the airline data into pandas dataframe
+# Read the airline data
 airline_data =  pd.read_csv('https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBMDeveloperSkillsNetwork-DV0101EN-SkillsNetwork/Data%20Files/airline_data.csv', 
                             encoding = "ISO-8859-1",
                             dtype={'Div1Airport': str, 'Div1TailNum': str, 
@@ -25,17 +24,7 @@ airline_data =  pd.read_csv('https://cf-courses-data.s3.us.cloud-object-storage.
 # List of years 
 year_list = [i for i in range(2005, 2021, 1)]
 
-"""Compute graph data for creating yearly airline performance report 
-
-Function that takes airline data as input and create 5 dataframes based on the grouping condition to be used for plottling charts and grphs.
-
-Argument:
-     
-    df: Filtered dataframe
-    
-Returns:
-   Dataframes to create graph. 
-"""
+# Compute graph data for yearly airline performance report
 def compute_data_choice_1(df):
     # Cancellation Category Count
     bar_data = df.groupby(['Month','CancellationCode'])['Flights'].sum().reset_index()
@@ -50,16 +39,7 @@ def compute_data_choice_1(df):
     return bar_data, line_data, div_data, map_data, tree_data
 
 
-"""Compute graph data for creating yearly airline delay report
-
-This function takes in airline data and selected year as an input and performs computation for creating charts and plots.
-
-Arguments:
-    df: Input airline data.
-    
-Returns:
-    Computed average dataframes for carrier delay, weather delay, NAS delay, security delay, and late aircraft delay.
-"""
+# Compute graph data for yearly airline delay report
 def compute_data_choice_2(df):
     # Compute delay averages
     avg_car = df.groupby(['Month','Reporting_Airline'])['CarrierDelay'].mean().reset_index()
@@ -71,55 +51,52 @@ def compute_data_choice_2(df):
 
 
 # Application layout
-app.layout = html.Div(children=[ 
-                                # TASK1: Add title to the dashboard
-                                # Enter your code below. Make sure you have correct formatting.
-     html.H1('US Domestic Airline Data visualization', style = {'textAlign':'center', 'color':'#FF0000', 'font-size': 22})
+app.layout = html.Div(children=[ html.H1(
+                                'US Domestic Airline Flights Performance', # Add title to the dashboard
+                                style={'textAlign': 'center', 'color': '#FF0000', 'font-size': 22}),
     
-    
-                                # REVIEW2: Dropdown creation
+                                # Dropdown creation
                                 # Create an outer division 
                                 html.Div([
-                                    # Add an division
+                                    # Add a division
                                     html.Div([
-                                        # Create an division for adding dropdown helper text for report type
+                                        # Create a division for adding dropdown helper text for report type
                                         html.Div(
                                             [
                                             html.H2('Report Type:', style={'margin-right': '2em'}),
                                             ]
                                         ),
-                                        # TASK2: Add a dropdown
-                                        # Enter your code below. Make sure you have correct formatting.
-                           cc.Dropdown(id='input-type', 
-                                                    options=[
-                                                            {'label': 'Yearly Airline Performance Report', 'value': 'OPT1'},
-                                                            {'label': 'Yearly Airline Delay Report', 'value': 'OPT2'}],
-                                                    placeholder='Select a report type',
-                                                    style={'width':'40%', 'padding':'4px', 'font-size': '22px', 'text-align-last': 'center'}),
-                               
+                                        # Add a dropdown
+                                        dcc.Dropdown(id='input-type', 
+                                            options=[
+                                                    {'label': 'Yearly Airline Performance Report', 'value': 'OPT1'},
+                                                    {'label': 'Yearly Airline Delay Report', 'value': 'OPT2'}
+                                                    ],
+                                            placeholder='Select a report type',
+                                            style={'width': '80%', 'padding': '3px', 'font-size': '20px', 'text-align-last': 'center'})                                        
                                         
                                     # Place them next to each other using the division style
                                     ], style={'display':'flex'}),
                                     
                                    # Add next division 
                                    html.Div([
-                                       # Create an division for adding dropdown helper text for choosing year
+                                       # Create a division for adding dropdown helper text for choosing year
                                         html.Div(
                                             [
                                             html.H2('Choose Year:', style={'margin-right': '2em'})
                                             ]
                                         ),
-                                        dcc.Dropdown(id ='input-year', 
+                                        dcc.Dropdown(id='input-year', 
                                                      # Update dropdown values using list comphrehension
-                                                     options = [{'label': i, 'value': i} for i in year_list],
-                                                     placeholder = "Select a year",
-                                                     style = {'width':'80%', 'padding':'3px', 'font-size': '20px', 'text-align-last' : 'center'}),
+                                                     options=[{'label': i, 'value': i} for i in year_list],
+                                                     placeholder="Select a year",
+                                                     style={'width':'80%', 'padding':'3px', 'font-size': '20px', 'text-align-last' : 'center'}),
                                             # Place them next to each other using the division style
-                                            ], style = {'display': 'flex'}),  
+                                            ], style={'display': 'flex'}),  
                                           ]),
                                 
                                 # Add Computed graphs
-                                # REVIEW3: Observe how we add an empty division and providing an id that will be updated during callback
+                                # Add empty divisions providing an id that will be updated during callback
                                 html.Div([ ], id='plot1'),
     
                                 html.Div([
@@ -127,30 +104,27 @@ app.layout = html.Div(children=[
                                         html.Div([ ], id='plot3')
                                 ], style={'display': 'flex'}),
                                 
-                                # TASK3: Add a division with two empty divisions inside. See above disvision for example.
-                                # Enter your code below. Make sure you have correct formatting.
-                               html.Div([
-                                       html.Div([ ], id = 'plot4'),
-                                       html.Div([ ], id = 'plot5')
-                               ],style = {'display': 'flex'}),
-                               ])
-                             
+                                # Add another division with two empty divisions inside.                                  
+                                html.Div([
+                                        html.Div([ ], id='plot4'),
+                                        html.Div([ ], id='plot5')
+                                ], style={'display': 'flex'}),                               
+                                ])
 
 # Callback function definition
-# TASK4: Add 5 ouput components
-# Enter your code below. Make sure you have correct formatting.
-@app.callback( [output(component_id = 'plot1', componnet_property = 'childern'),
-                output(component_id = 'plot2', componnet_property = 'childern'),
-                output(component_id = 'plot3', componnet_property = 'childern'),
-                output(component_id = 'plot4', componnet_property = 'childern'),
-                output(component_id = 'plot5', componnet_property = 'childern')],
-               [Input(component_id='input-type', component_property = 'value'),
-                Input(component_id='input-year', component_property = 'value')],
-               # REVIEW4: Holding output state till user enters all the form information. In this case, it will be chart type and year
+@app.callback( [Output(component_id='plot1', component_property='children'),
+                Output(component_id='plot2', component_property='children'),
+                Output(component_id='plot3', component_property='children'),
+                Output(component_id='plot4', component_property='children'),
+                Output(component_id='plot5', component_property='children')],
+               [Input(component_id='input-type', component_property='value'),
+                Input(component_id='input-year', component_property='value')],
+               # Holding output state till user enters all the form information. In this case, it will be chart type and year
                [State("plot1", 'children'), State("plot2", "children"),
                 State("plot3", "children"), State("plot4", "children"),
                 State("plot5", "children")
                ])
+
 # Add computation to callback function and return graph
 def get_graph(chart, year, children1, children2, c3, c4, c5):
       
@@ -164,16 +138,13 @@ def get_graph(chart, year, children1, children2, c3, c4, c5):
             # Number of flights under different cancellation categories
             bar_fig = px.bar(bar_data, x='Month', y='Flights', color='CancellationCode', title='Monthly Flight Cancellation')
             
-            # TASK5: Average flight time by reporting airline
-            # Enter your code below. Make sure you have correct formatting.
-            line_fig = px.line(line_data, x = 'Month' , y = 'AirTime', color = 'Repoting_Airline', title = 'Averge monthly flight time in minutes by airline') 
-            
-            
+            # Average flight time by reporting airline
+            line_fig = px.line(line_data, x='Month', y='AirTime', color='Reporting_Airline', title='Average monthly flight time (minutes) by airline')            
             
             # Percentage of diverted airport landings per reporting airline
             pie_fig = px.pie(div_data, values='Flights', names='Reporting_Airline', title='% of flights by reporting airline')
             
-            # REVIEW5: Number of flights flying from each state using choropleth
+            # Number of flights flying from each state using choropleth
             map_fig = px.choropleth(map_data,  # Input data
                     locations='OriginState', 
                     color='Flights',  
@@ -185,25 +156,19 @@ def get_graph(chart, year, children1, children2, c3, c4, c5):
                     title_text = 'Number of flights from origin state', 
                     geo_scope='usa') # Plot only the USA instead of globe
             
-            # TASK6: Number of flights flying to each state from each reporting airline
-            # Enter your code below. Make sure you have correct formatting.
-            tree_fig = px.treemap(tree_data,
-                       path = ['DestState', 'Reporting_Airline'],
-                       values = 'Flights',
-                       color = 'Flights',
-                       color_continuous_scale = 'RdBu',
-                       title = 'Flight count from airline to destination')
+            # Number of flights flying to each state from each reporting airline
+            tree_fig = px.treemap(tree_data, path=['DestState', 'Reporting_Airline'], values='Flights',
+                                    color='Flights', color_continuous_scale='RdBu', 
+                                    title='Flight count by airline to destination state') 
             
-            
-            # REVIEW6: Return dcc.Graph component to the empty division
+            # Return dcc.Graph component to the empty division
             return [dcc.Graph(figure=tree_fig), 
                     dcc.Graph(figure=pie_fig),
                     dcc.Graph(figure=map_fig),
                     dcc.Graph(figure=bar_fig),
                     dcc.Graph(figure=line_fig)
                    ]
-        else:
-            # REVIEW7: This covers chart type 2 and we have completed this exercise under Flight Delay Time Statistics Dashboard section
+        else: 
             # Compute required information for creating graph from the data
             avg_car, avg_weather, avg_NAS, avg_sec, avg_late = compute_data_choice_2(df)
             
